@@ -1,0 +1,155 @@
+<canvas id="game-canvas"></canvas>
+
+<script>
+
+    playerVelocity = { x: 0, y: 0 };
+    velocityMagnitude = 1;
+    timeInterval = 1000 / 15;
+    tileCount = 30;
+    playerPosition = { x: tileCount / 2, y: tileCount / 2 };
+    applePosition = { x: (tileCount / 2) + 5, y: (tileCount / 2) + 5 };
+    gridSize = 20;
+    trail = [];
+    tail = 5;
+    reducePowerUpPosition = { x: (tileCount / 2) - 5, y: (tileCount / 2) + 8 };
+    bigApplePosition = { x: (tileCount / 2) - 5, y: (tileCount / 2) - 3 };
+
+    window.onload = runGame;
+
+    function runGame() {
+        canv = document.getElementById("game-canvas");
+        canv.width = tileCount * gridSize;
+        canv.height = tileCount * gridSize;
+        ctx = canv.getContext("2d");
+        document.addEventListener("keydown", inputKeyPressed);
+        setInterval(game, timeInterval);
+    }
+
+    function game() {
+        playerPosition.x += playerVelocity.x;
+        playerPosition.y += playerVelocity.y;
+        screenWrap(playerPosition, tileCount);
+        drawGameMap();
+        drawTrail();
+        updateTrail();
+        handlePowerUps();
+        drawApple(applePosition);
+        drawBigApple(bigApplePosition);
+        drawReducePowerUp(reducePowerUpPosition);
+    }
+
+    function handlePowerUps() {
+        if (isPlayerOnApple()) {
+            tail++;
+            applePosition = randomPosition();
+        }
+
+        if (isPlayerOnReducePowerUp()) {
+            if (tail > 2) {
+                tail -= 2;
+            }
+            reducePowerUpPosition = randomPosition();
+        }
+
+        if (isPlayerOnBigApple()) {
+            tail += 5;
+            bigApplePosition = randomPosition();
+        }
+    }
+
+    function drawTrail() {
+        ctx.fillStyle = "lime";
+        for (var i = 0; i < trail.length; i++) {
+            ctx.fillRect(trail[i].x * gridSize, trail[i].y * gridSize, gridSize, gridSize);
+            if (trail[i].x == playerPosition.x && trail[i].y == playerPosition.y) {
+                reset();
+            }
+        }
+    }
+
+    function isPlayerOnApple() {
+        return applePosition.x == playerPosition.x && applePosition.y == playerPosition.y;
+    }
+
+    function isPlayerOnReducePowerUp() {
+        return reducePowerUpPosition.x == playerPosition.x && reducePowerUpPosition.y == playerPosition.y;
+    }
+
+    function isPlayerOnBigApple() {
+        return bigApplePosition.x == playerPosition.x && bigApplePosition.y == playerPosition.y;
+    }
+
+    function updateTrail() {
+        trail.push({ x: playerPosition.x, y: playerPosition.y });
+
+        while (trail.length > tail) {
+            trail.shift();
+        }
+    }
+
+    function drawGameMap() {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canv.width, canv.height);
+    }
+
+    function drawApple(position) {
+        drawRectangle("red", position);
+    }
+
+    function drawBigApple(position) {
+        drawRectangle("gold", position);
+    }
+
+    function drawReducePowerUp(position) {
+        drawRectangle("blue", position);
+    }
+
+    function drawRectangle(color, position){
+        ctx.fillStyle = color;
+        ctx.fillRect(position.x * gridSize, position.y * gridSize, gridSize - 2, gridSize - 2);
+    }
+
+    function randomPosition() {
+        return { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
+    }
+
+    function screenWrap(position, screenCount) {
+        if (position.x < 0) {
+            position.x = screenCount - 1;
+        }
+        if (position.y < 0) {
+            position.y = screenCount - 1;
+        }
+        if (position.x > screenCount - 1) {
+            position.x = 0;
+        }
+        if (position.y > screenCount - 1) {
+            position.y = 0;
+        }
+    }
+
+    function reset() {
+        playerVelocity = { x: 0, y: 0 };
+        playerPosition = { x: tileCount / 2, y: tileCount / 2 };
+        tail = 5
+        trail = [];
+    }
+
+    function inputKeyPressed(event) {
+        switch (event.keyCode) {
+            case 37:
+                playerVelocity = { x: -1, y: 0 };
+                break;
+            case 38:
+                playerVelocity = { x: 0, y: -1 };
+                break;
+            case 39:
+                playerVelocity = { x: 1, y: 0 };
+                break;
+            case 40:
+                playerVelocity = { x: 0, y: 1 };
+                break;
+        }
+    }
+
+</script>
