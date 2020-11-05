@@ -4,4 +4,4 @@ To run it, all you have to do is drag the html file into a browser.
 
 Have fun!
 
-![Alt text](SnakeGame.gif) / ![](SnakeGame.gif)
+![](SnakeGame.gif)
